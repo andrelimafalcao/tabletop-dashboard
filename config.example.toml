@@ -1,0 +1,26 @@
+# Copy this file to config.toml and fill in your values.
+# config.toml is gitignored — never commit secrets.
+
+[display]
+# Waveshare e-Ink display model (e.g. "epd2in13_V4", "epd7in5_V2").
+# Use "mock" to save PNG frames instead of driving hardware.
+model = "mock"
+
+# Directory for mock PNG output (only used when model = "mock").
+mock_output_dir = "/tmp/tabletop-dashboard"
+
+[calendar]
+# List one or more calendar sources.
+# Each source is either a CalDAV URL or a plain iCal (.ics) URL.
+[[calendar.sources]]
+name = "Personal"
+# CalDAV example:
+#   url = "https://caldav.fastmail.com/dav/calendars/user/you@example.com/personal/"
+#   username = "you@example.com"
+#   password = "app-specific-password"
+# iCal (read-only) example:
+url = "https://calendar.google.com/calendar/ical/your.ical.address/public/basic.ics"
+
+[scheduler]
+# How often (in seconds) to refresh calendar data and redraw the display.
+refresh_interval_sec = 900  # 15 minutes
