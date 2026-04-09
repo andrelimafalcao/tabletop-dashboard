@@ -3,7 +3,7 @@
 from __future__ import annotations
 
 import logging
-from datetime import datetime, timedelta, timezone
+from datetime import UTC, datetime, timedelta
 
 import requests
 from icalendar import Calendar  # type: ignore[import-untyped]
@@ -22,7 +22,7 @@ class CalendarFetcher:
 
     def fetch_upcoming(self, days_ahead: int = 7) -> list[CalendarEvent]:
         """Return events starting within the next *days_ahead* days, sorted by start time."""
-        now = datetime.now(tz=timezone.utc)
+        now = datetime.now(tz=UTC)
         cutoff = now + timedelta(days=days_ahead)
         events: list[CalendarEvent] = []
 
@@ -38,7 +38,7 @@ class CalendarFetcher:
         self, source: CalendarSource, start: datetime, end: datetime
     ) -> list[CalendarEvent]:
         if source.url.startswith("webcal://"):
-            url = "https://" + source.url[len("webcal://"):]
+            url = "https://" + source.url[len("webcal://") :]
         else:
             url = source.url
 
@@ -51,9 +51,7 @@ class CalendarFetcher:
         return self._parse_ical(response.content, start, end)
 
     @staticmethod
-    def _parse_ical(
-        data: bytes, start: datetime, end: datetime
-    ) -> list[CalendarEvent]:
+    def _parse_ical(data: bytes, start: datetime, end: datetime) -> list[CalendarEvent]:
         cal = Calendar.from_ical(data)
         events: list[CalendarEvent] = []
 
@@ -69,7 +67,7 @@ class CalendarFetcher:
             # Normalise to aware datetime for comparison
             if isinstance(event_start, datetime):
                 if event_start.tzinfo is None:
-                    event_start = event_start.replace(tzinfo=timezone.utc)
+                    event_start = event_start.replace(tzinfo=UTC)
                 if not (start <= event_start <= end):
                     continue
                 all_day = False

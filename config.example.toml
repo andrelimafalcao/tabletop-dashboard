@@ -9,18 +9,42 @@ model = "mock"
 # Directory for mock PNG output (only used when model = "mock").
 mock_output_dir = "/tmp/tabletop-dashboard"
 
+# Display resolution in pixels. Set to match your hardware.
+# 800×480 = 7.5" Waveshare (default)
+# 400×300 = 4.2" Waveshare
+width = 800
+height = 480
+
 [calendar]
 # List one or more calendar sources.
-# Each source is either a CalDAV URL or a plain iCal (.ics) URL.
+# Each source is either a plain iCal (.ics) URL or a CalDAV URL.
 [[calendar.sources]]
 name = "Personal"
-# CalDAV example:
-#   url = "https://caldav.fastmail.com/dav/calendars/user/you@example.com/personal/"
-#   username = "you@example.com"
-#   password = "app-specific-password"
-# iCal (read-only) example:
+# iCal (read-only) example — Google Calendar "secret address in iCal format":
 url = "https://calendar.google.com/calendar/ical/your.ical.address/public/basic.ics"
 
+# CalDAV example (Fastmail, Nextcloud, iCloud, etc.):
+# [[calendar.sources]]
+# name = "Work"
+# url = "https://caldav.fastmail.com/dav/calendars/user/you@example.com/personal/"
+# username = "you@example.com"
+# password = "app-specific-password"
+
 [scheduler]
-# How often (in seconds) to refresh calendar data and redraw the display.
+# How often (in seconds) to re-fetch calendar data from sources.
 refresh_interval_sec = 900  # 15 minutes
+
+[views]
+# Ordered list of views to cycle through.
+# Available: "main_dashboard", "daily_agenda", "mini_month"
+rotation = ["main_dashboard", "daily_agenda", "mini_month"]
+
+# How long (seconds) to display each view before rotating to the next.
+rotation_interval_sec = 900   # 15 minutes per view
+
+# How often (seconds) to update the clock and next-event badge without a
+# full refresh (e-Ink partial update — fast, no flash).
+partial_refresh_interval_sec = 60  # every minute
+
+# How often (seconds) to force a full refresh to clear ghosting artifacts.
+full_refresh_interval_sec = 3600  # every hour

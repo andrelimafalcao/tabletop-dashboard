@@ -20,22 +20,30 @@ logging.basicConfig(
 
 def _build_driver(config_path: Path):  # type: ignore[return]
     from tabletop_dashboard.config import load_config as _lc
+
     cfg = _lc(config_path)
 
     model = cfg.display.model.lower()
     if model == "mock":
-        return MockDisplayDriver(output_dir=cfg.display.mock_output_dir)
+        return MockDisplayDriver(
+            output_dir=cfg.display.mock_output_dir,
+            width=cfg.display.width,
+            height=cfg.display.height,
+        )
 
     # Hardware drivers are imported lazily so the app starts without the
     # Waveshare library installed (e.g., in CI or on non-Pi hosts).
     try:
         from tabletop_dashboard.display.waveshare import WaveshareEPDDriver  # type: ignore[import]
+
         return WaveshareEPDDriver(model=cfg.display.model)
     except ImportError:
-        logging.warning(
-            "Waveshare EPD library not found; falling back to MockDisplayDriver."
+        logging.warning("Waveshare EPD library not found; falling back to MockDisplayDriver.")
+        return MockDisplayDriver(
+            output_dir=cfg.display.mock_output_dir,
+            width=cfg.display.width,
+            height=cfg.display.height,
         )
-        return MockDisplayDriver(output_dir=cfg.display.mock_output_dir)
 
 
 def main() -> None:

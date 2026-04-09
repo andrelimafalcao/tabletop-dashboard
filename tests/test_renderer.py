@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from PIL import Image
 
@@ -27,14 +27,14 @@ def test_mock_driver_dimensions():  # type: ignore[no-untyped-def]
 
 def test_renderer_produces_image(mock_driver):  # type: ignore[no-untyped-def]
     renderer = Renderer(mock_driver)
-    now = datetime(2026, 4, 9, 8, 0, tzinfo=timezone.utc)
+    now = datetime(2026, 4, 9, 8, 0, tzinfo=UTC)
     events = [
         CalendarEvent(
-            start=datetime(2026, 4, 9, 10, 0, tzinfo=timezone.utc),
+            start=datetime(2026, 4, 9, 10, 0, tzinfo=UTC),
             title="Team standup",
         ),
         CalendarEvent(
-            start=datetime(2026, 4, 9, 14, 30, tzinfo=timezone.utc),
+            start=datetime(2026, 4, 9, 14, 30, tzinfo=UTC),
             title="1:1 with manager",
         ),
     ]
@@ -45,7 +45,7 @@ def test_renderer_produces_image(mock_driver):  # type: ignore[no-untyped-def]
 
 def test_renderer_empty_events(mock_driver):  # type: ignore[no-untyped-def]
     renderer = Renderer(mock_driver)
-    renderer.render([], as_of=datetime(2026, 4, 9, 8, 0, tzinfo=timezone.utc))
+    renderer.render([], as_of=datetime(2026, 4, 9, 8, 0, tzinfo=UTC))
     assert mock_driver.last_frame_path is not None
 
 
@@ -53,3 +53,11 @@ def test_renderer_clears_display(mock_driver):  # type: ignore[no-untyped-def]
     mock_driver.clear()
     assert mock_driver.last_frame_path is not None
     assert mock_driver.last_frame_path.exists()
+
+
+def test_mock_driver_display_partial(tmp_path):  # type: ignore[no-untyped-def]
+    driver = MockDisplayDriver(output_dir=tmp_path)
+    partial_img = Image.new("L", (driver.width, 148), 200)
+    driver.display_partial(partial_img, (0, 0, driver.width, 148))
+    assert driver.last_partial_path is not None
+    assert driver.last_partial_path.exists()

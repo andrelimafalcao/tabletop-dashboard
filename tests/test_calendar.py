@@ -2,12 +2,10 @@
 
 from __future__ import annotations
 
-from datetime import date, datetime, timezone
+from datetime import UTC, date, datetime
 
-from tabletop_dashboard.calendar.models import CalendarEvent
 from tabletop_dashboard.calendar.fetcher import CalendarFetcher
-from tabletop_dashboard.config import CalendarSource
-
+from tabletop_dashboard.calendar.models import CalendarEvent
 
 ICAL_FIXTURE = b"""\
 BEGIN:VCALENDAR
@@ -36,12 +34,8 @@ END:VCALENDAR
 
 
 def test_calendar_event_ordering():  # type: ignore[no-untyped-def]
-    earlier = CalendarEvent(
-        start=datetime(2026, 4, 9, 8, 0, tzinfo=timezone.utc), title="Early"
-    )
-    later = CalendarEvent(
-        start=datetime(2026, 4, 9, 10, 0, tzinfo=timezone.utc), title="Late"
-    )
+    earlier = CalendarEvent(start=datetime(2026, 4, 9, 8, 0, tzinfo=UTC), title="Early")
+    later = CalendarEvent(start=datetime(2026, 4, 9, 10, 0, tzinfo=UTC), title="Late")
     assert earlier < later
     assert sorted([later, earlier]) == [earlier, later]
 
@@ -52,8 +46,8 @@ def test_calendar_event_all_day():  # type: ignore[no-untyped-def]
 
 
 def test_parse_ical_returns_upcoming():  # type: ignore[no-untyped-def]
-    start = datetime(2026, 4, 9, 0, 0, tzinfo=timezone.utc)
-    end = datetime(2026, 4, 16, 0, 0, tzinfo=timezone.utc)
+    start = datetime(2026, 4, 9, 0, 0, tzinfo=UTC)
+    end = datetime(2026, 4, 16, 0, 0, tzinfo=UTC)
     events = CalendarFetcher._parse_ical(ICAL_FIXTURE, start, end)
     titles = [e.title for e in events]
     assert "Team standup" in titles
@@ -62,8 +56,8 @@ def test_parse_ical_returns_upcoming():  # type: ignore[no-untyped-def]
 
 
 def test_parse_ical_timed_event_fields():  # type: ignore[no-untyped-def]
-    start = datetime(2026, 4, 9, 0, 0, tzinfo=timezone.utc)
-    end = datetime(2026, 4, 16, 0, 0, tzinfo=timezone.utc)
+    start = datetime(2026, 4, 9, 0, 0, tzinfo=UTC)
+    end = datetime(2026, 4, 16, 0, 0, tzinfo=UTC)
     events = CalendarFetcher._parse_ical(ICAL_FIXTURE, start, end)
     standup = next(e for e in events if e.title == "Team standup")
     assert isinstance(standup.start, datetime)

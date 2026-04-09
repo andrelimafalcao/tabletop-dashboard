@@ -15,8 +15,8 @@ class MockDisplayDriver(DisplayDriver):
     Useful for local development and CI — no hardware required.
     """
 
-    DEFAULT_WIDTH = 250
-    DEFAULT_HEIGHT = 122
+    DEFAULT_WIDTH = 800
+    DEFAULT_HEIGHT = 480
 
     def __init__(
         self,
@@ -29,6 +29,7 @@ class MockDisplayDriver(DisplayDriver):
         self._width = width
         self._height = height
         self._frame_count = 0
+        self._partial_count = 0
 
     @property
     def width(self) -> int:
@@ -43,6 +44,16 @@ class MockDisplayDriver(DisplayDriver):
         out_path = self._output_dir / f"frame_{self._frame_count:04d}.png"
         image.save(out_path)
 
+    def display_partial(
+        self,
+        image: Image.Image,
+        region: tuple[int, int, int, int],
+    ) -> None:
+        """Save the partial-refresh crop as a separate PNG file."""
+        self._partial_count += 1
+        out_path = self._output_dir / f"partial_{self._partial_count:04d}.png"
+        image.save(out_path)
+
     def clear(self) -> None:
         white = Image.new("L", (self._width, self._height), 255)
         self.display(white)
@@ -52,3 +63,9 @@ class MockDisplayDriver(DisplayDriver):
         if self._frame_count == 0:
             return None
         return self._output_dir / f"frame_{self._frame_count:04d}.png"
+
+    @property
+    def last_partial_path(self) -> Path | None:
+        if self._partial_count == 0:
+            return None
+        return self._output_dir / f"partial_{self._partial_count:04d}.png"

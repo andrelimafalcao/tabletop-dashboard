@@ -36,5 +36,20 @@ class DisplayDriver(ABC):
         """Clear the display to white."""
         ...
 
-    def close(self) -> None:
+    def display_partial(
+        self,
+        image: Image.Image,
+        region: tuple[int, int, int, int],
+    ) -> None:
+        """Push a partial update for *region* = (x0, y0, x1, y1).
+
+        Default implementation pastes the partial image onto a full white
+        frame and calls :meth:`display` — effectively a full refresh.
+        Hardware drivers should override this with a true partial update.
+        """
+        full = Image.new("L", (self.width, self.height), 255)
+        full.paste(image, (region[0], region[1]))
+        self.display(full)
+
+    def close(self) -> None:  # noqa: B027
         """Optional teardown (e.g. put display to sleep). Default: no-op."""
